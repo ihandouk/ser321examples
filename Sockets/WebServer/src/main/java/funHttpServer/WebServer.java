@@ -18,6 +18,7 @@ package funHttpServer;
 
 import java.io.*;
 import java.net.*;
+import org.json.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,6 +63,7 @@ class WebServer {
           server.close();
         } catch (IOException e) {
           // TODO Auto-generated catch block
+        	System.out.println("exception: " + e.getMessage());
           e.printStackTrace();
         }
       }
@@ -209,11 +211,17 @@ class WebServer {
           Integer result = num1 * num2;
 
           // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Result is: " + result);
-
+          if (result != null && result == num1 * num2) { // success
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Result is: " + result);
+         }else { // failure
+        	builder.append("HTTP/1.1 403 Forbidden\n");
+        	builder.append("Content-Type: text/html; charset=utf-\n");
+        	builder.append("\n");
+        	builder.append("Incorrect result...");
+          }
           // TODO: Include error handling here with a correct error code and
           // a response that makes sense
 
@@ -228,10 +236,17 @@ class WebServer {
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
           query_pairs = splitQuery(request.replace("github?", ""));
-          String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
+          String json = fetchURL("https://api.github.com/repos/amehlhase316/memoranda" + query_pairs.get("query"));
           System.out.println(json);
 
           builder.append("Check the todos mentioned in the Java source file");
+          
+          JSONObject newObj = new JSONObject(json);
+          System.out.println(newObj.getString("login"));
+          System.out.println(newObj.getString("name"));
+          System.out.println(newObj.getString("full_name"));
+          System.out.println(newObj.getString("id"));
+          
           // TODO: Parse the JSON returned by your fetch and create an appropriate
           // response
           // and list the owner name, owner id and name of the public repo on your webpage, e.g.
